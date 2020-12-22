@@ -20,21 +20,160 @@ vbiosname="gpuvbios.rom"
 ##### Location to put vbios (change if you dont want to use below location) if location doesnt exist it will be created for you.
 vbioslocation="/mnt/user/isos/vbios/"
 
+##### Runs checks on device to see if it is in fact a GPU. Recommended to leave set as "yes"
+safety="yes"
+
 ########## DO NOT CHANGE BELOW THIS LINE #################################################################
 dumpid="0000:$gpuid"
 
+mygpu=$(lspci -s $gpuid)
+
 disconnectid=$(echo "$dumpid" | sed 's?:?\\:?g')
 
+
+
 ########## Script functions #################################################################
+checkgpuiscorrect() {
+	mygpu=$(lspci -s $gpuid) || echo "That is NOT a valid PCI device. Please correct the id and rerun the script" 
+	echo "You have selected this device to dump the vbios from"
+	if grep -i 'VGA compatible controller' <<< "$mygpu"  ; then 
+		if grep -i 'Intel' <<< "$mygpu"  ; then 
+			echo "This looks like its an integrated INTEL GPU and vbios dump will most likely FAIL"
+			echo "Please select a dedicated GPU to dump vbios from"
+			echo "If you really want to try then rerun script changing variable to safety=off"
+		else
+			echo
+			echo "This does look like a valid GPU to me. Continuing ........."
+			echo
+		fi
+	elif  grep -i 'Audio Device' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like an AUDIO device"
+	echo "Maybe you have selected the audio part of your GPU ?"
+	echo "Please edit the script and make sure to put the id of ONLY the VGA part of your GPU"
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are all the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'USB controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a USB controller"
+	echo "Some GPUs have a USB part to them. Maybe you selected that ?"
+	echo "Please edit the script and make sure to put the id of ONLY the VGA part of your GPU"
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'Serial bus controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a USB type C controller"
+	echo "Some GPUs have a USB type C part to them. Maybe you selected that ?"
+	echo "Please edit the script and make sure to put the id of ONLY the VGA part of your GPU"
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'Network controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a NETWORK adapter "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'Ethernet controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a NETWORK adapter "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'SATA controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a SATA controller "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'Non-Volatile memory controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a NVME controller "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'PCI bridge' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a PCI bridge "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'Host bridge' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a HOST bridge "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'SMBus' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a SMBus controller "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	elif  grep -i 'Encryption controller' <<< "$mygpu"  ; then 
+	echo
+	echo "This doesn't look like a GPU to me. It looks like a Encryption controller "
+	echo "Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	else
+	echo "$mygpu"
+	echo
+	echo "This doesn't look like a GPU to me. Please correct the id and rerun the script."
+	echo "If you are 100 % sure this is the VGA part of your GPU then rerun script changing variable to safety=off"
+	echo
+	echo "These are the GPUs that I can see in your server"
+	lspci | grep -i 'vga'
+	exit
+	fi
+	
+}
+
+
 checklocation() {
 	# check if vbios location exists and if not create it
+	echo
 	echo "Checking if location to put vbios file exists"
 		if [ ! -d "$vbioslocation" ] ; then
  
 			echo "Vbios folder created at "$mountlocation" "
+			echo
 			mkdir -vp "$vbioslocation" # make the directory as it doesnt exist
 		else
 			echo "Vbios folder "$mountlocation" already exists"
+			echo
 		fi
 }
 
@@ -83,8 +222,10 @@ isgpuprimary () {
 	if [ "$primarygpu" = "yes" ] ; then	
 			echo "disconnecting primary graphics card"
 			echo "1" | tee -a /sys/bus/pci/devices/$disconnectid/remove
-			echo "entered suspended (sleep) state"
+			echo "entered suspended (sleep) state ......"
+			echo
 			echo " PRESS POWER BUTTON ON SERVER TO CONTINUE"
+			echo
 			echo -n mem > /sys/power/state
 			echo "rescanning pci bus"
 			echo "1" | tee -a /sys/bus/pci/rescan
@@ -93,12 +234,15 @@ isgpuprimary () {
 			echo
 			
 	elif [ "$primarygpu" = "no" ] ; then			
-			echo "This GPU is not primary so no need to disconnect and reconnect it"
+			echo "This GPU is NOT set as Primary GPU so no need to disconnect and reconnect it"
+			echo "*note* If the GPU is the Primary or only GPU in your server you will need to change this in the script otherwise the vbios dump will not be good. "
+			echo "       If this is NOT a Primary GPU then vbios will be fine"
 			echo
 
 	else 
 			echo "primarygpu is set as "$primarygpu" this is not a recognised option"
 			echo "Please set primarygpu to either yes or no "
+			exit
 	fi
 }
 
@@ -145,7 +289,11 @@ cleanup() {
 }
 
 ########## run functions #################################################################
-
+if [ "$safety" = "no" ] ; then	
+echo "Safety checks are disabled. Continuing ......"
+else
+checkgpuiscorrect
+fi
 checklocation
 buildtempvm
 isgpuprimary
