@@ -76,7 +76,7 @@ dumpvbios() {
 	cd /sys/bus/pci/devices/"$dumpid"/
 	echo 1 > rom
 	echo "okay dumping vbios to "$vbioslocation" file named "$vbiosname""
-	at rom > "$vbioslocation""$vbiosname"
+	cat rom > "$vbioslocation""$vbiosname" || echo "Something went wrong vbios not dumped correctly"
 	echo 0 > rom
 }
 
