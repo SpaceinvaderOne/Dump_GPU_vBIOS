@@ -9,19 +9,34 @@
 #  You can find the id of the gpu to dump from Unraid GUI in tools/system devices
 #  For example if gpu was "[1002:67df] 0c:00.0 VGA compatible controller"
 #  The number is after the bracketed id - ie for the above after [1002:67df] so the gpuid would be "0c:00.0"
-gpuid="0e:00.0"
 
-####### If the gpu is primary or the only GPU in the server then set below to "yes" (lowercase)
-primarygpu="no"
+###################
+gpuid="xx:xx.x"
+###################
 		
 #####Name the vbios for example gtx2080ti.rom	
-vbiosname="gpuvbios.rom"
+
+###################
+vbiosname="gpu vbios.rom"
+###################
 
 ##### Location to put vbios (change if you dont want to use below location) if location doesnt exist it will be created for you.
+
+###################
 vbioslocation="/mnt/user/isos/vbios/"
+###################
+
+####### If the gpu is primary or the only GPU in the server then set below to "yes" (lowercase)
+
+###################
+primarygpu="no"
+###################
 
 ##### Runs checks on device to see if it is in fact a GPU. Recommended to leave set as "yes"
+
+###################
 safety="yes"
+###################
 
 ########## DO NOT CHANGE BELOW THIS LINE #################################################################
 dumpid="0000:$gpuid"
@@ -30,11 +45,11 @@ mygpu=$(lspci -s $gpuid)
 
 disconnectid=$(echo "$dumpid" | sed 's?:?\\:?g')
 
-
+filepath="$vbioslocation""$vbiosname"
 
 ########## Script functions #################################################################
 checkgpuiscorrect() {
-	mygpu=$(lspci -s $gpuid) || echo "That is NOT a valid PCI device. Please correct the id and rerun the script" 
+	mygpu=$(lspci -s $gpuid) || { notvalidpci; exit; } 
 	echo "You have selected this device to dump the vbios from"
 	if grep -i 'VGA compatible controller' <<< "$mygpu"  ; then 
 		if grep -i 'Intel' <<< "$mygpu"  ; then 
@@ -161,6 +176,13 @@ checkgpuiscorrect() {
 	
 }
 
+notvalidpci() {
+	echo "That is NOT a valid PCI device. Please correct the id and rerun the script"
+ 	echo
+ 	echo "These are all the GPUs that I can see in your server. Please choose one of these"
+ 	lspci | grep -i 'vga'
+}
+	
 
 checklocation() {
 	# check if vbios location exists and if not create it
@@ -220,23 +242,23 @@ isgpuprimary () {
 	# Check Primary GPU and wether gpu has already been disconnected
 	# Disconnect GPU and set server to sleep mode then rescan bus
 	if [ "$primarygpu" = "yes" ] ; then	
-			echo "disconnecting primary graphics card"
+			echo "Disconnecting the graphics card"
 			echo "1" | tee -a /sys/bus/pci/devices/$disconnectid/remove
-			echo "entered suspended (sleep) state ......"
+			echo "Entered suspended (sleep) state ......"
 			echo
 			echo " PRESS POWER BUTTON ON SERVER TO CONTINUE"
 			echo
 			echo -n mem > /sys/power/state
-			echo "rescanning pci bus"
+			echo "Rescanning pci bus"
 			echo "1" | tee -a /sys/bus/pci/rescan
-			echo "Primary graphics has now sucessfully been disconnected and reconnected"
-			echo "It is ready to begin the dump vbios process"
+			echo "Graphics card has now sucessfully been disconnected and reconnected"
+			echo "It is now ready to begin the dump vbios process"
 			echo
 			
 	elif [ "$primarygpu" = "no" ] ; then			
-			echo "This GPU is NOT set as Primary GPU so no need to disconnect and reconnect it"
-			echo "*note* If the GPU is the Primary or only GPU in your server you will need to change this in the script otherwise the vbios dump will not be good. "
-			echo "       If this is NOT a Primary GPU then vbios will be fine"
+			echo "I will try and dump the vbios without disconnecting and reconnecting the GPU"
+			echo "This normally only works if the GPU is NOT the Primary or the only GPU"
+			echo "I will check the vbios at the end. If it seems wrong I will then retry after disconnecting the GPU"
 			echo
 
 	else 
@@ -278,15 +300,39 @@ dumpvbios() {
 cleanup() {
 	if [ -e /tmp/dumpvbios.xml ] ; then
 		rm /tmp/dumpvbios.xml 
-		echo
-		echo "All done :)"
-		exit
-	else
-		echo	
-		echo "All done :)"
-		exit
 	fi
 }
+
+
+checkvbios() {
+	if [ -n "$(find "$filepath" -prune -size -70000c)" ]; then
+	    printf '%s is less than 70kb\n' "$filepath"
+		echo "This seems too small. Probably the GPU is Primary and needs disconnecting and reconnecting to get proper vbios"
+		echo
+		echo "Running again"
+		primarygpu="yes"
+		buildtempvm
+		isgpuprimary
+		startstopvm
+		dumpvbios
+		cleanup
+		if [ -n "$(find "$filepath" -prune -size -70000c)" ]; then
+		    printf '%s is less than 70kb\n' "$filepath"
+			echo "This seems small but maybe its correct. Please try it. All done !"
+			exit
+		fi
+		echo
+		echo "vbios seems to be correct. All done :)"
+		exit
+		
+	else
+	echo
+	echo "vbios seems to be correct. All done :)"
+	exit	
+	fi
+}
+
+
 
 ########## run functions #################################################################
 if [ "$safety" = "no" ] ; then	
@@ -299,5 +345,5 @@ buildtempvm
 isgpuprimary
 startstopvm
 dumpvbios
-cleanup
+checkvbios
 exit
