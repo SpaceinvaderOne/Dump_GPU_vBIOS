@@ -7,7 +7,7 @@
 ##### FILL IN THE  VARIABLES BELOW #######################################################################
 
 ###################
-gpuid="xx:xx.x"
+gpuid="xxxxxx"
 ###################
 		
 #####Name the vbios for example gtx2080ti.rom	
@@ -35,6 +35,8 @@ dumpid="0000:$gpuid"
 mygpu=$(lspci -s $gpuid)
 
 disconnectid=$(echo "$dumpid" | sed 's?:?\\:?g')
+
+disconnectid2=$(echo "$disconnectid" | sed 's/\(.*\)0/\11/')
 
 filepath="$vbioslocation""$vbiosname"
 
@@ -282,13 +284,25 @@ dumpvbios() {
 	echo " Checking if GPU need unbinding ........"
 	echo
 	echo "$dumpid"  > /sys/bus/pci/drivers/vfio-pci/unbind || echo "Please ignore the above error. Didn't need to unbind GPU"
-	cd /sys/bus/pci/devices/"$dumpid"/
+	cd /sys/bus/pci/devices/"$dumpid"/ 
 	echo 1 > rom
 	echo
 	echo "Okay dumping vbios file named "$vbiosname" to the location "$vbioslocation" "
-	cat rom > "$vbioslocation""$vbiosname" || echo "Something went wrong vbios not dumped correctly"
+	cat rom > "$vbioslocation""$vbiosname" || needtobind
 	echo 0 > rom
 }
+
+needtobind() {
+	echo
+	echo "Um.... somethings gone wrong and I couldn't dump the vbios for some reason"
+	echo "Sometimes when this happens all we need to do to fix this is 'stub' or 'bind to the vfio' the gpu and reboot the server"
+	echo
+	echo "This can be done in Unraid 6.8.3 with the use of the vfio config plugin or if you are on Unraid 6.9 or above it can be done"
+	echo "directly from the gui in Tools/System Devices .....So please do this and run the script again"
+	echo
+	exit 
+}
+
 
 cleanup() {
 	if [ -e /tmp/dumpvbios.xml ] ; then
@@ -298,7 +312,11 @@ cleanup() {
 
 
 checkvbios() {
-	if [ -n "$(find "$filepath" -prune -size -70000c)" ]; then
+	if [ -n "$(find "$filepath" -prune -size -2000c)" ]; then
+		needtobind
+	
+	
+	elif [ -n "$(find "$filepath" -prune -size -70000c)" ]; then
 	    printf '%s is less than 70kb\n' "$filepath"
 		echo "This seems too small. Probably the GPU is Primary and needs disconnecting and reconnecting to get proper vbios"
 		echo
