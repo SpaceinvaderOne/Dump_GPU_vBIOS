@@ -2,7 +2,7 @@
 **Script to dump the vBios from any GPU even if a primary GPU**
 
 This script is designed to be used on an Unraid server (using the user scripts plugin) but could easily be adapted to run on any Linux based OS
-The script will dump the vBios of any connected GPU. It will dump the vbios wether the gpu is primary sedondary or only etc.
+The script will dump the vBios of any connected GPU. It will dump the vbios wether the GPU is primary sedondary or only GPU etc.
 
 **How the script works.**
 1. It will take take the id of a GPU, make a temporary seabios vm with the card attached, then quickly start and stop the vm with GPU passed through. This will put the GPU in the correct state to dump the vBios.
