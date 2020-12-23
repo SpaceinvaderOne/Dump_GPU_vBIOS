@@ -1,4 +1,4 @@
-## **DUMP_GPU_VBIOS**
+## **DUMP_GPU_vBIOS**
 **Script to dump the vbios from any GPU even if a primary GPU**
 
 This script is designed to be used on an Unraid server (using the user scripts plugin) but could easily be adapted to run on any Linux based OS
