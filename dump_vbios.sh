@@ -2,13 +2,9 @@
 # Script to dump GPU vbios from any Unraid GPU 
 # by SpaceinvaderOne
 
-##### FILL IN THE  VARIABLES BELOW #######################################################################
+##### Read the readme for how to use this script #####
 
-##### ID of GPU to dump vbios from #####
-#  How to get id of the GPU
-#  You can find the id of the gpu to dump from Unraid GUI in tools/system devices
-#  For example if gpu was "[1002:67df] 0c:00.0 VGA compatible controller"
-#  The number is after the bracketed id - ie for the above after [1002:67df] so the gpuid would be "0c:00.0"
+##### FILL IN THE  VARIABLES BELOW #######################################################################
 
 ###################
 gpuid="xx:xx.x"
@@ -26,12 +22,6 @@ vbiosname="gpu vbios.rom"
 vbioslocation="/mnt/user/isos/vbios/"
 ###################
 
-####### If the gpu is primary or the only GPU in the server then set below to "yes" (lowercase)
-
-###################
-primarygpu="no"
-###################
-
 ##### Runs checks on device to see if it is in fact a GPU. Recommended to leave set as "yes"
 
 ###################
@@ -39,6 +29,7 @@ safety="yes"
 ###################
 
 ########## DO NOT CHANGE BELOW THIS LINE #################################################################
+
 dumpid="0000:$gpuid"
 
 mygpu=$(lspci -s $gpuid)
@@ -46,6 +37,8 @@ mygpu=$(lspci -s $gpuid)
 disconnectid=$(echo "$dumpid" | sed 's?:?\\:?g')
 
 filepath="$vbioslocation""$vbiosname"
+
+primarygpu="no"
 
 ########## Script functions #################################################################
 checkgpuiscorrect() {
