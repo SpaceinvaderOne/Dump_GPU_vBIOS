@@ -9,5 +9,7 @@ How the script works.
 2. It will then delte the temporary vm as no longer needed.
 3. It will dump the vbios of the card then check the size of the vbios. 
 4. If the vbios looks correct it will finish the process and put the vbios  in the loaction specified in the script (defualt /mnt/user/isos/vbios) 
-     b. However if the vbios looks incorrect and the vbios is under 70kb then it was probably dumped from a primary gpu and the vbios was shadowed resulting in an incorrect small file. So the script will now disconnect the gpu then put the server to sleep, prompting you to press the power button to resume the server from its sleep state. Once server is woken the script will rescan the pci bus connecting the GPU. This now allows the primary gpu to be able to have the vbios dumped correctly. Script will then redump the vbios again putting the vbios in the loaction specified in the script (defualt /mnt/user/isos/vbios)
+5. However if the vbios looks incorrect and the vbios is under 70kb then it was probably dumped from a primary gpu. Because the vbios was shadowed during boot process the resulting vbios is a small file which is not correct. So the script will now disconnect the GPU then put the server to sleep.Next it prompting you to press the power button to resume the server from its sleep state. Once server is woken the script will rescan the pci bus reconnecting the GPU. This now allows the primary gpu to be able to have the vbios dumped correctly. Script will then redump the vbios again putting the vbios in the loaction specified in the script (defualt /mnt/user/isos/vbios)
+
+
 
