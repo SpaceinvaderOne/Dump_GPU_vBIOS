@@ -1,12 +1,12 @@
 ## **DUMP_GPU_vBIOS**
-**Script to dump the vbios from any GPU even if a primary GPU**
+**Script to dump the vBios from any GPU even if a primary GPU**
 
 This script is designed to be used on an Unraid server (using the user scripts plugin) but could easily be adapted to run on any Linux based OS
-The script will dump the vbios of any connected GPU. It will dump the vbios wether the gpu is primary sedondary or only etc.
+The script will dump the vBios of any connected GPU. It will dump the vbios wether the gpu is primary sedondary or only etc.
 
 **How the script works.**
-1. It will take take the id of a gpu, make a temporary seabios vm with the card attached, then quickly start and stop the vm with gpu passed through. This will put the GPU in the correct state to dump the vbios.
-2. It will then delte the temporary vm as no longer needed.
+1. It will take take the id of a GPU, make a temporary seabios vm with the card attached, then quickly start and stop the vm with GPU passed through. This will put the GPU in the correct state to dump the vBios.
+2. It will then delete the temporary vm as no longer needed.
 3. It will dump the vbios of the card then check the size of the vbios. 
 4. If the vbios looks correct it will finish the process and put the vbios in the location specified in the script (default /mnt/user/isos/vbios) 
 5. However if the vbios looks incorrect and the vbios is under 70kb then it was probably dumped from a primary GPU. This is because the vbios was shadowed during the boot process and so the resulting vbios is a small file which is not correct. So the script will now disconnect the GPU then put the server to sleep.Next it will prompt you to press the power button to resume the server from its sleep state. Once server is woken the script will rescan the pci bus reconnecting the GPU. This now allows the primary gpu to be able to have the vbios dumped correctly. Script will then redump the vbios again putting the vbios in the loaction specified in the script (defualt /mnt/user/isos/vbios)
