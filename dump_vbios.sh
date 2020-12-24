@@ -7,10 +7,12 @@
 ##### FILL IN THE  VARIABLES BELOW #######################################################################
 
 ###################
-gpuid="xxxxxx"
+gpuid="xxxxxx "
 ###################
 		
 #####Name the vbios for example gtx2080ti.rom	
+
+### Naming of the vbios is optional ....  if you do not rename it here then the script will name it based off the details found about the gpu dumped
 
 ###################
 vbiosname="gpu vbios.rom"
@@ -30,6 +32,10 @@ safety="yes"
 
 ########## DO NOT CHANGE BELOW THIS LINE #################################################################
 
+gpuid=$(echo "$gpuid" | sed 's/ *$//')
+
+gpuid=$(echo "$gpuid" | sed 's/^ *//g')
+
 dumpid="0000:$gpuid"
 
 mygpu=$(lspci -s $gpuid)
@@ -38,9 +44,11 @@ disconnectid=$(echo "$dumpid" | sed 's?:?\\:?g')
 
 disconnectid2=$(echo "$disconnectid" | sed 's/\(.*\)0/\11/')
 
-filepath="$vbioslocation""$vbiosname"
+vganame=$( lspci | grep -i "$gpuid" )
 
-primarygpu="no"
+forcereset="no"
+
+
 
 ########## Script functions #################################################################
 checkgpuiscorrect() {
@@ -236,7 +244,7 @@ EOF
 isgpuprimary () {
 	# Check Primary GPU and wether gpu has already been disconnected
 	# Disconnect GPU and set server to sleep mode then rescan bus
-	if [ "$primarygpu" = "yes" ] ; then	
+	if [ "$forcereset" = "yes" ] ; then	
 			echo "Disconnecting the graphics card"
 			echo "1" | tee -a /sys/bus/pci/devices/$disconnectid/remove
 			echo "Entered suspended (sleep) state ......"
@@ -250,15 +258,15 @@ isgpuprimary () {
 			echo "It is now ready to begin the dump vbios process"
 			echo
 			
-	elif [ "$primarygpu" = "no" ] ; then			
+	elif [ "$forcereset" = "no" ] ; then			
 			echo "I will try and dump the vbios without disconnecting and reconnecting the GPU"
 			echo "This normally only works if the GPU is NOT the Primary or the only GPU"
 			echo "I will check the vbios at the end. If it seems wrong I will then retry after disconnecting the GPU"
 			echo
 
 	else 
-			echo "primarygpu is set as "$primarygpu" this is not a recognised option"
-			echo "Please set primarygpu to either yes or no "
+			echo "forcereset is set as "$forcereset" this is not a recognised option"
+			echo "Please set forcereset to either yes or no "
 			exit
 	fi
 }
@@ -281,9 +289,11 @@ startstopvm() {
 }
 
 dumpvbios() {
-	echo " Checking if GPU need unbinding ........"
+	# if no name was given for vbios then make name from vga name from lspci
+	if [ "$vbiosname" = "gpu vbios.rom" ] ; then
+		vbiosname=$( echo "$vganame" |  awk 'NR > 1 {print $1}' RS='[' FS=']' )
+	fi
 	echo
-	echo "$dumpid"  > /sys/bus/pci/drivers/vfio-pci/unbind || echo "Please ignore the above error. Didn't need to unbind GPU"
 	cd /sys/bus/pci/devices/"$dumpid"/ 
 	echo 1 > rom
 	echo
@@ -312,6 +322,7 @@ cleanup() {
 
 
 checkvbios() {
+	filepath="$vbioslocation""$vbiosname"
 	if [ -n "$(find "$filepath" -prune -size -2000c)" ]; then
 		needtobind
 	
@@ -321,7 +332,7 @@ checkvbios() {
 		echo "This seems too small. Probably the GPU is Primary and needs disconnecting and reconnecting to get proper vbios"
 		echo
 		echo "Running again"
-		primarygpu="yes"
+		forcereset="yes"
 		buildtempvm
 		isgpuprimary
 		startstopvm
