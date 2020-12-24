@@ -7,7 +7,7 @@
 ##### FILL IN THE  VARIABLES BELOW #######################################################################
 
 ###################
-gpuid="xxxxxx "
+gpuid="xxxxxx"
 ###################
 		
 #####Name the vbios for example gtx2080ti.rom	
