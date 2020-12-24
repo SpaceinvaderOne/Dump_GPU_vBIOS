@@ -19,7 +19,7 @@ The script will dump the vBios of any connected GPU. It will dump the vbios weth
 3. Script will report an error saying  "That is NOT a valid PCI device. Please correct the id and rerun the script" as no GPU has been selected. It will list the GPUs in your server. From this list take the ID of the GPU from which you want to dump the vbios. For example "0c:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 470/480/570/570X/580/580X/590]" the id is the first block of character ie 0c:00.0
 4. Copy the id and edit the script variable gpuid="xx:xx.x"  removing the contents between the quotations replacing it with the ID for example gpuid="0c:00.0"
 5. Give the vbios a name by replacing the contens of the variable vbiosname="gpu vbios.rom" to the name of your gpu etc.
-   *note if no name is given then script will try and name the vbios based on the the info it finds from lspci*
+      *note if no name is given then script will try and name the vbios based on the the info it finds from lspci*
 6. optional - The default location of where the vbios will be dumped is in the isos share in a folder called vbios. You can change this by changing the variable vbioslocation="/mnt/user/isos/vbios/" to the location of your choosing.
 7. Save changes and run the script.
 
