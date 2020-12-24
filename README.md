@@ -27,5 +27,9 @@ The script will dump the vBios of any connected GPU. It will dump the vbios weth
 **Notes about the script**
 
 The script will put the server to sleep in order to reset a primary GPU in order for a sucessful dump. So your server must support sleep if you want to dump a primary GPU. For other non primary GPUs this is not necessary.
+
+For best results power down server then start server (not reboot)  before using script. make sure whilst running script no vms or containers are running.
+
 There are some checks the script will make to check that you have in fact put in the id of the gpu and not some other hardware. However these checks can be disabled by changing the varaiable from safety="yes" to safety="no"
 
+setting the variable forcereset="no" to forcereset="yes" will make the script always forcereset the gpu before dumping vbios (if set to no it will only force reset if it thinks its dumping a primary gpu)
