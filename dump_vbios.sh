@@ -7,7 +7,7 @@
 ##### FILL IN THE  VARIABLES BELOW #######################################################################
 
 ###################
-gpuid="xxxxxx"
+gpuid="05:00.0"
 ###################
 		
 #####Name the vbios for example gtx2080ti.rom	
@@ -15,7 +15,7 @@ gpuid="xxxxxx"
 ### Naming of the vbios is optional ....  if you do not rename it here then the script will name it based off the details found about the gpu dumped
 
 ###################
-vbiosname="gpu vbios.rom"
+vbiosname="5600g_vega7.rom"
 ###################
 
 ##### Location to put vbios (change if you dont want to use below location) if location doesnt exist it will be created for you.
@@ -295,11 +295,9 @@ dumpvbios() {
 	fi
 	echo
 	cd /sys/bus/pci/devices/"$dumpid"/ 
-	echo 1 > rom
 	echo
 	echo "Okay dumping vbios file named "$vbiosname" to the location "$vbioslocation" "
-	cat rom > "$vbioslocation""$vbiosname" || needtobind
-	echo 0 > rom
+	echo 1 > "$vbioslocation""$vbiosname" || needtobind
 }
 
 needtobind() {
@@ -323,11 +321,7 @@ cleanup() {
 
 checkvbios() {
 	filepath="$vbioslocation""$vbiosname"
-	if [ -n "$(find "$filepath" -prune -size -2000c)" ]; then
-		needtobind
-	
-	
-	elif [ -n "$(find "$filepath" -prune -size -70000c)" ]; then
+	if [ -n "$(find "$filepath" -prune -size -70000c)" ]; then
 	    printf '%s is less than 70kb\n' "$filepath"
 		echo "This seems too small. Probably the GPU is Primary and needs disconnecting and reconnecting to get proper vbios"
 		echo
